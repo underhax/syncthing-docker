@@ -1,0 +1,57 @@
+name: syncthing
+
+services:
+  syncthing:
+    image: ghcr.io/underhax/syncthing:${SYNCTHING_VERSION:-latest}
+    container_name: syncthing
+    hostname: syncthing
+    restart: always
+    user: "${APP_UID}:${APP_GID}"
+    read_only: true
+    ipc: none
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add: []
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+          pids: 30
+    mem_reservation: 64M
+    ulimits:
+      nofile:
+        soft: 2048
+        hard: 4096
+    tmpfs:
+      - /tmp:mode=1777,noexec,nosuid,nodev,size=64m
+    volumes:
+      - ./config:/var/syncthing/config:rw
+      - ./data:/data:rw
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${WG_HOST_IP}:${SYNCTHING_GUI_PORT}:8384"
+      - "${WG_HOST_IP}:${SYNCTHING_SYNC_PORT}:22000/tcp"
+      - "${WG_HOST_IP}:${SYNCTHING_SYNC_PORT}:22000/udp"
+    networks:
+      - syncthing
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/probe"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+networks:
+  syncthing:
+    name: syncthing
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: "false"
