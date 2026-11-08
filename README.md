@@ -114,6 +114,38 @@ sudo docker compose -f /home/syncthing/docker-compose.yaml up -d
 ---
 
 <details>
+<summary><strong>Permissions &amp; Ownership</strong></summary>
+
+### Host Permissions & Privilege Separation
+
+The stack enforces strict host-level privilege separation across three ownership tiers so that even in the event of a container compromise (`syncthing`), the process cannot modify deployment manifests, service configurations, or directory permissions:
+
+* `root:root` (0600): `docker-compose.yaml` and `.env` (accessible exclusively to host root).
+* `root:syncthing` (0750): `/home/syncthing` base directory (traversable by the service group, writable strictly by host root).
+* `syncthing:syncthing` (0700/0600): `config/` (configuration, cryptographic keys, device identities, and index database) and `data/` (synced payloads). Managed with `umask 077`: directories `0700`, files `0600`.
+
+### One-Shot Permission Reset (Running Stack)
+
+Use this self-contained block to apply or restore canonical ownership and permissions on an existing or migrated installation without stopping the stack:
+
+```bash
+sudo chown root:syncthing /home/syncthing
+sudo chmod 0750 /home/syncthing
+
+sudo chown root:root /home/syncthing/{docker-compose.yaml,.env}
+sudo chmod 0600 /home/syncthing/{docker-compose.yaml,.env}
+
+sudo chown -R syncthing:syncthing /home/syncthing/{config,data}
+sudo chmod 0700 /home/syncthing/{config,data}
+sudo find /home/syncthing/{config,data} -mindepth 1 -type d -exec chmod 0700 {} +
+sudo find /home/syncthing/{config,data} -type f -exec chmod 0600 {} +
+```
+
+</details>
+
+---
+
+<details>
 <summary><strong>Operation &amp; Maintenance</strong></summary>
 
 ### Verifying Service Health

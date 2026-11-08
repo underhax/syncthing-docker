@@ -2,7 +2,7 @@ name: syncthing
 
 services:
   syncthing:
-    image: ghcr.io/underhax/syncthing:${SYNCTHING_VERSION:-latest}
+    image: ghcr.io/underhax/syncthing-docker:${SYNCTHING_VERSION:-latest}
     container_name: syncthing
     hostname: syncthing
     restart: always

@@ -8,8 +8,8 @@ COPY go.mod ./
 COPY probe/ ./probe/
 
 RUN mkdir -p /out/var/syncthing/config /out/data /out/tmp /out/etc/ssl/certs && \
-    chmod 0755 /out/var /out/etc /out/etc/ssl /out/etc/ssl/certs && \
-    chmod 0700 /out/var/syncthing /out/var/syncthing/config /out/data && \
+    chmod 0755 /out/var /out/var/syncthing /out/etc /out/etc/ssl /out/etc/ssl/certs && \
+    chmod 0700 /out/var/syncthing/config /out/data && \
     chmod 1777 /out/tmp && \
     cp /etc/ssl/certs/ca-certificates.crt /out/etc/ssl/certs/ca-certificates.crt && \
     chmod 0444 /out/etc/ssl/certs/ca-certificates.crt && \
